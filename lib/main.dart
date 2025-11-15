@@ -79,6 +79,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
       _userEmail = '';
       _currentUser = null;
       _packages = [];
+      _databaseService.clearUser();
     });
   }
 
@@ -142,18 +143,14 @@ class _AuthWrapperState extends State<AuthWrapper> {
   Future<void> _handleLogin(String email, String password) async {
     final cleanEmail = email.trim();
     final cleanPassword = password.trim();
-    await _handleRegistration("as", "as", "as", "as"); //pre-sequel
 
-    //_databaseService.lerDados();
-    //print("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n Descrição do produto: \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
-
-    //final storedUser = await _databaseService.getUserByEmail(cleanEmail);
     String realSenha = "p";
     realSenha = await _databaseService.getSenhaRegsReal(cleanEmail);
     if ( /*storedUser != null &&*/ realSenha.trim() == cleanPassword) {
       idBox = cleanEmail;
-      final User u = User(email: "as", password: "as", boxId: idBox);
-      await _databaseService.updateUser(u);
+      await _handleRegistration("as", cleanPassword, idBox, "as"); //pre-sequel
+      //final User u = User(email: "as", password: cleanPassword, boxId: idBox);
+      //await _databaseService.updateUser(u);
       await _loadUserData("as");
       await _loadRealPackge(); //encomendas
       //print("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n ACESS: \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n",);
@@ -242,8 +239,33 @@ class _AuthWrapperState extends State<AuthWrapper> {
     await _loadUserData(_userEmail);
   }
 
+  Future<void> _verificadorAutoLogin() async {
+    final storedUser = await _databaseService.getUserByEmail("as");
+    if (storedUser != null) {
+      idBox = storedUser.boxId;
+      await _handleRegistration(
+        "as",
+        storedUser.password,
+        idBox,
+        "as",
+      ); //pre-sequel
+      await _loadUserData("as");
+      await _loadRealPackge(); //encomendas
+      print("\n\n\n\nACESSS\n\n\n");
+    } else {
+      print("\n\n\n\nNEGADO\n\n\n");
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _verificadorAutoLogin(); // 👈 executa quando a página carrega
+  }
+
   @override
   Widget build(BuildContext context) {
+    //_verificadorAutoLogin();
     // Se AUTENTICADO E DADOS CARREGADOS
     if (_isAuthenticated && _currentUser != null) {
       return HomeScreen(

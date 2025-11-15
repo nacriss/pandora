@@ -74,6 +74,7 @@ class _HomeScreenState extends State<HomeScreen> {
       PackageListScreen(
         packages: widget.packages,
         onUpdatePhoto: widget.onUpdatePhoto,
+        onReloadData: widget.onReloadData,
         onAddPackageRequested: () =>
             _navigateToAddPackageScreen(context), // FAB chama esta função
       ),

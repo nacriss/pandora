@@ -6,15 +6,19 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../models/package_model.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../services/database_service.dart';
+
 class PackageDetailsScreen extends StatefulWidget {
   // CORRIGIDO: Agora usa 'package' em vez de 'packageData'
   final Package package;
   final Function(String, String) onUpdatePhoto;
+  final Future<void> Function() onReloadData;
 
   const PackageDetailsScreen({
     super.key,
     required this.package, // Usando 'package'
     required this.onUpdatePhoto,
+    required this.onReloadData,
   });
 
   @override
@@ -116,6 +120,37 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
         ),
       ],
     );
+  }
+
+  // Confirmação de DELETE
+  Future<bool> confirmarSaida(BuildContext context) async {
+    return await showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: const Text("Confirmar"),
+            content: const Text("Tem certeza que deseja DELETAR?"),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(false), // Não voltar
+                child: const Text("Cancelar"),
+              ),
+              TextButton(
+                onPressed: () {
+                  setState(() {
+                    final DatabaseService databaseService = DatabaseService();
+                    databaseService.deletePackage(widget.package.id);
+                    widget.onReloadData();
+                    Navigator.of(context).pop();
+                    Navigator.of(context).pop();
+                    //Navigator.of(context).pop();
+                  });
+                }, // Confirmar
+                child: const Text("Sim"),
+              ),
+            ],
+          ),
+        ) ??
+        false;
   }
 
   @override
@@ -287,7 +322,9 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
                           iconSize: 36,
                           icon: Icon(Icons.delete, color: Colors.red),
                           onPressed: () {
-                            setState(() {});
+                            setState(() {
+                              confirmarSaida(context);
+                            });
                           },
                         ),
                       ),

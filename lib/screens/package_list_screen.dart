@@ -10,12 +10,14 @@ class PackageListScreen extends StatelessWidget {
   final Function() onAddPackageRequested;
   final Function(String, String)
   onUpdatePhoto; // Necessário para a tela de detalhes
+  final Future<void> Function() onReloadData;
 
   const PackageListScreen({
     super.key,
     required this.packages,
     required this.onAddPackageRequested,
     required this.onUpdatePhoto,
+    /*required Future<void> Function() onReloadData,*/ required this.onReloadData,
   });
 
   @override
@@ -56,6 +58,7 @@ class PackageListScreen extends StatelessWidget {
                             builder: (ctx) => PackageDetailsScreen(
                               package: package,
                               onUpdatePhoto: onUpdatePhoto,
+                              onReloadData: this.onReloadData,
                             ),
                           ),
                         );

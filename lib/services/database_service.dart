@@ -18,6 +18,7 @@ import 'dart:ffi';
 }
 
 */
+import 'package:pandora/main.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import '../models/user_model.dart';
@@ -32,6 +33,8 @@ import 'package:firebase_database/firebase_database.dart';
 final _real = FirebaseDatabase.instance;
 
 class DatabaseService {
+  //final Future<void> Function() onReloadData;
+
   void lerDados() async {
     try {
       await _real.ref("quarto").set({"dono": "Mateus"});
@@ -226,6 +229,11 @@ class DatabaseService {
     await db.delete(packageTableName);
   }
 
+  Future<void> clearUser() async {
+    final db = await database;
+    await db.delete(userTableName);
+  }
+
   Future<void> insertPackage(Package package) async {
     final db = await database;
     await db.insert(
@@ -247,6 +255,29 @@ class DatabaseService {
     return List.generate(maps.length, (i) {
       return Package.fromMap(maps[i]);
     });
+  }
+
+  Future<void> deletePackage(String packageId) async {
+    await deletePackageReal(packageId);
+  }
+
+  Future<int> deletePackageLocal(String packageId) async {
+    final db = await database;
+
+    return await db.delete(
+      packageTableName,
+      where: 'id = ?',
+      whereArgs: [packageId],
+    );
+  }
+
+  Future<void> deletePackageReal(String path) async {
+    try {
+      await _real.ref("caixa:$idBox/produtos/$path").remove();
+      print("Dado removido com sucesso!");
+    } catch (e) {
+      print("Erro ao remover: $e");
+    }
   }
 
   Future<void> updatePackageStatus(
