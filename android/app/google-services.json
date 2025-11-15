@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "718949512727",
+    "firebase_url": "https://pandora32-6f15b-default-rtdb.firebaseio.com",
+    "project_id": "pandora32-6f15b",
+    "storage_bucket": "pandora32-6f15b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:718949512727:android:ae937d7c2325d370a84e52",
+        "android_client_info": {
+          "package_name": "com.example.pandora"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDoPhQ51r-gzddt9iJs8tNxirSUpYhX75I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

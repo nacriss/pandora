@@ -1,7 +1,9 @@
 // lib/screens/add_package_screen.dart
 
 import 'package:flutter/material.dart';
+import 'package:pandora/models/user_model.dart';
 import '../models/package_model.dart';
+import '../services/database_service.dart';
 
 class AddPackageScreen extends StatefulWidget {
   final String userEmail;
@@ -38,25 +40,38 @@ class _AddPackageScreenState extends State<AddPackageScreen> {
     });
   }
 
-  void _handleSubmit() {
-    if (_formKey.currentState!.validate() && _estimatedDelivery.isNotEmpty) {
+  Future<void> _handleRealAddPackage(Package newPackage) async {
+    final DatabaseService databaseService = DatabaseService();
+    User? uuser = await databaseService.getUserByEmail("as");
+
+    //await databaseService.insertRealPackage(newPackage, uuser!.boxId);
+    await databaseService.insertRealPackage(newPackage, uuser!.boxId);
+    //await _loadRealPackge(); //encomendas
+  }
+
+  Future<void> _handleSubmit() async {
+    if (_formKey.currentState!.validate()) {
+      String cod = _trackingCodeController.text;
       final newPackage = Package(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        id: "id_$cod",
+        //DateTime.now().millisecondsSinceEpoch.toString(),
         userEmail: widget.userEmail,
         sender: _senderController.text,
         description: _descriptionController.text,
         status: PackageStatus.pending,
-        estimatedDelivery: _estimatedDelivery,
-        trackingCode: _trackingCodeController.text,
+        estimatedDelivery: "",
+        trackingCode: "id_$cod",
       );
 
-      widget.onPackageAdded(newPackage);
+      await _handleRealAddPackage(newPackage);
+
+      await widget.onPackageAdded(newPackage);
       Navigator.of(context).pop(); // Volta para a lista
-    } else if (_estimatedDelivery.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Selecione a Data de Entrega!')),
-      );
-    }
+    } /*else if (_estimatedDelivery.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Falha no cadastro!')));
+    }*/
   }
 
   @override
@@ -107,6 +122,7 @@ class _AddPackageScreenState extends State<AddPackageScreen> {
               const SizedBox(height: 24),
 
               // Data de Entrega Estimada
+              /*
               Row(
                 children: [
                   Expanded(
@@ -123,7 +139,7 @@ class _AddPackageScreenState extends State<AddPackageScreen> {
                     label: const Text('Selecionar Data'),
                   ),
                 ],
-              ),
+              ),*/
               const SizedBox(height: 40),
 
               // Botão Cadastrar

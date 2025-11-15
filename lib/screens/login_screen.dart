@@ -82,8 +82,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           TextFormField(
                             controller: _emailController,
                             decoration: const InputDecoration(
-                              labelText: 'Email',
-                              hintText: 'seu@email.com',
+                              labelText: 'IdBox',
+                              hintText: '0',
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.all(
                                   Radius.circular(12),
@@ -92,7 +92,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                             keyboardType: TextInputType.emailAddress,
                             validator: (value) => value!.isEmpty
-                                ? 'Por favor, insira seu email'
+                                ? 'Por favor, insira o codigo da caixa'
                                 : null,
                           ),
                           const SizedBox(height: 16),
@@ -133,7 +133,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               child: const Text('Entrar'),
                             ),
                           ),
-                          const SizedBox(height: 24),
+                          const SizedBox(height: 24) /*
                           TextButton(
                             onPressed: widget.onRegisterRequested,
                             style: TextButton.styleFrom(
@@ -145,7 +145,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             child: const Text(
                               'Ainda não tem conta? Cadastre-se',
                             ),
-                          ),
+                          ),*/,
                         ],
                       ),
                     ),

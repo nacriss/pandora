@@ -1,16 +1,20 @@
 // lib/screens/smart_box_control_screen.dart
 
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:pandora/main.dart';
 import '../widgets/pandora_icon.dart';
 
 class SmartBoxControlScreen extends StatefulWidget {
   // CORREÇÃO: O parâmetro 'pendingPackagesCount' é definido no construtor.
   final int pendingPackagesCount;
+  final String idBox;
 
   const SmartBoxControlScreen({
     super.key,
     this.pendingPackagesCount = 0, // Definido como opcional com valor padrão
+    required this.idBox,
   });
 
   @override
@@ -19,24 +23,22 @@ class SmartBoxControlScreen extends StatefulWidget {
 
 class _SmartBoxControlScreenState extends State<SmartBoxControlScreen> {
   // Estados simulados
+  final _real = FirebaseDatabase.instance;
   bool _isLocked = true;
   bool _autoLock = true;
   bool _notifications = true;
   bool _isConnected = true;
 
-  void _handleLockToggle() {
+  Future<void> initLocker() async {
+    DataSnapshot dataSnap = (await _real.ref("caixa:$idBox/estado").get());
+    String s = dataSnap.value as String;
     setState(() {
-      _isLocked = !_isLocked;
+      if (s == "aberto") {
+        _isLocked = false;
+      } else {
+        _isLocked = true;
+      }
     });
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          _isLocked
-              ? 'Comando de Fechar enviado!'
-              : 'Comando de Abrir enviado!',
-        ),
-      ),
-    );
   }
 
   void _handleEmergencyOpen() {
@@ -88,8 +90,29 @@ class _SmartBoxControlScreenState extends State<SmartBoxControlScreen> {
     );
   }
 
+  void _handleLockToggle() {
+    setState(() async {
+      _isLocked = !_isLocked;
+      if (_isLocked) {
+        await _real.ref("caixa:$idBox").update({"estado": "fechado"});
+      } else {
+        await _real.ref("caixa:$idBox").update({"estado": "aberto"});
+      }
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          _isLocked
+              ? 'Comando de Fechar enviado!'
+              : 'Comando de Abrir enviado!',
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    initLocker();
     // Lógica para contagem de encomendas pendentes
     final int count = widget.pendingPackagesCount;
     final String packageStatusText = count == 0 ? 'Nenhuma' : count.toString();
@@ -137,6 +160,7 @@ class _SmartBoxControlScreenState extends State<SmartBoxControlScreen> {
                     crossAxisSpacing: 16,
                     childAspectRatio: 2.5,
                     children: [
+                      /*
                       _buildStatusTile(
                         LucideIcons.wifi,
                         _isConnected ? Colors.green : Colors.red,
@@ -148,7 +172,7 @@ class _SmartBoxControlScreenState extends State<SmartBoxControlScreen> {
                         Colors.green,
                         'Bateria',
                         '85%',
-                      ),
+                      ),*/
                       _buildStatusTile(
                         _isLocked ? LucideIcons.lock : LucideIcons.unlock,
                         _isLocked ? Colors.red : Colors.green,
@@ -157,9 +181,9 @@ class _SmartBoxControlScreenState extends State<SmartBoxControlScreen> {
                       ),
                       _buildStatusTile(
                         LucideIcons.package,
-                        count > 0 ? Colors.blue : Colors.grey,
-                        packageLabel,
-                        packageStatusText,
+                        /*count > 0 ?*/ Colors.blue, // : Colors.grey,
+                        "Box",
+                        widget.idBox,
                       ),
                     ],
                   ),
@@ -178,7 +202,7 @@ class _SmartBoxControlScreenState extends State<SmartBoxControlScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Controles',
+                    'Controle',
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   const Divider(height: 24),
@@ -212,6 +236,7 @@ class _SmartBoxControlScreenState extends State<SmartBoxControlScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
+                      /*
                       Expanded(
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 4.0),
@@ -281,7 +306,7 @@ class _SmartBoxControlScreenState extends State<SmartBoxControlScreen> {
                             ),
                           ),
                         ),
-                      ),
+                      ),*/
                     ],
                   ),
                 ],
@@ -303,21 +328,22 @@ class _SmartBoxControlScreenState extends State<SmartBoxControlScreen> {
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   const Divider(height: 24),
+                  /*
                   _buildSwitchTile(
                     'Travamento Automático',
                     _autoLock,
                     (val) => setState(() => _autoLock = val),
-                  ),
+                  ),*/
                   _buildSwitchTile(
                     'Notificações',
                     _notifications,
                     (val) => setState(() => _notifications = val),
-                  ),
+                  ) /*
                   _buildSwitchTile(
                     'Conexão Wi-Fi',
                     _isConnected,
                     (val) => setState(() => _isConnected = val),
-                  ),
+                  ),*/,
                 ],
               ),
             ),

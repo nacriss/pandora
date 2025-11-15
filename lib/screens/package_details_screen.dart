@@ -214,7 +214,7 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const Text(
-                            'Previsão',
+                            'Chegada',
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 14,
@@ -268,6 +268,42 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
                         : _buildUploadPlaceholder(),
                   ),
                 ),
+                const SizedBox(height: 30),
+
+                SizedBox(
+                  width: 500,
+                  height: 130,
+
+                  child: Column(
+                    children: [
+                      Container(
+                        width: 60,
+                        height: 60,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.red.withOpacity(0.1),
+                        ),
+                        child: IconButton(
+                          iconSize: 36,
+                          icon: Icon(Icons.delete, color: Colors.red),
+                          onPressed: () {
+                            setState(() {});
+                          },
+                        ),
+                      ),
+                      //SizedBox(width: 12),
+                      Text(
+                        "Deletar",
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                //SizedBox(width: 30), // espaço entre ícone e texto
               ],
             ),
           ),

@@ -18,6 +18,10 @@ class HomeScreen extends StatefulWidget {
   final User
   currentUser; // Corrigido para ser não nulo, pois só acessa aqui se estiver logado
   final Future<void> Function(User) onUserUpdated;
+  // 💡 NOVO: Adicione o callback para recarregar dados
+  final Future<void> Function() onReloadData;
+  // 💡 NOVO: Adicione o callback para recarregar dados
+  final String idBox;
 
   const HomeScreen({
     super.key,
@@ -29,6 +33,9 @@ class HomeScreen extends StatefulWidget {
     required this.currentUser, // Deve ser não nulo
     required this.onUserUpdated,
     required int pendingPackagesCount,
+    // 💡 NOVO: Adicione o callback ao construtor
+    required this.onReloadData,
+    required this.idBox,
   });
 
   @override
@@ -61,7 +68,7 @@ class _HomeScreenState extends State<HomeScreen> {
     // 1. Definição das Telas de Conteúdo
     final List<Widget> widgetOptions = <Widget>[
       // 0. Controle (Primeira aba)
-      const SmartBoxControlScreen(),
+      SmartBoxControlScreen(idBox: widget.idBox),
 
       // 1. Encomendas (Aba do meio)
       PackageListScreen(
@@ -72,10 +79,10 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
 
       // 2. Perfil (Última aba)
-      ProfileScreen(
+      /*ProfileScreen(
         currentUser: widget.currentUser,
         onUserUpdated: widget.onUserUpdated,
-      ),
+      ),*/
     ];
 
     return Scaffold(
@@ -84,6 +91,13 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: Theme.of(context).primaryColor,
         foregroundColor: Colors.white,
         actions: [
+          IconButton(
+            icon: const Icon(Icons.repeat),
+            /*onPressed: widget.onLogout,
+            tooltip: 'Sair',*/
+            onPressed: widget.onReloadData, // Chama o callback
+            tooltip: 'Recarregar Dados',
+          ),
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: widget.onLogout,
@@ -104,7 +118,7 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: Icon(Icons.list_alt),
             label: 'Encomendas',
           ),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Perfil'),
+          //BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Perfil'),
         ],
         currentIndex: _selectedIndex,
         selectedItemColor: Theme.of(context).primaryColor,

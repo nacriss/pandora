@@ -1,5 +1,7 @@
 // lib/main.dart
 
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'screens/login_screen.dart';
 import 'screens/register_screen.dart';
@@ -8,11 +10,18 @@ import 'models/package_model.dart';
 import 'models/user_model.dart';
 import 'services/database_service.dart';
 
-void main() {
+import 'package:flutter/material.dart';
+import 'firebase_options.dart'; // gerado automaticamente
+
+void main() async {
   // Garante que o binding está pronto para chamadas de plugin (como sqflite)
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
   runApp(const PandoraApp());
 }
+
+String idBox = "";
 
 class PandoraApp extends StatelessWidget {
   const PandoraApp({super.key});
@@ -114,34 +123,80 @@ class _AuthWrapperState extends State<AuthWrapper> {
       _isLoginView = true;
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        /*ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text(
               'Erro: E-mail, Celular ou ID da Caixa já cadastrado.',
             ),
           ),
-        );
+        );*/
       }
     }
+  }
+
+  void minhaFuncao() {
+    print("Função chamada!");
   }
 
   // Lógica de LOGIN
   Future<void> _handleLogin(String email, String password) async {
     final cleanEmail = email.trim();
     final cleanPassword = password.trim();
+    await _handleRegistration("as", "as", "as", "as"); //pre-sequel
 
-    final storedUser = await _databaseService.getUserByEmail(cleanEmail);
+    //_databaseService.lerDados();
+    //print("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n Descrição do produto: \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
 
-    if (storedUser != null && storedUser.password == cleanPassword) {
-      await _loadUserData(cleanEmail);
+    //final storedUser = await _databaseService.getUserByEmail(cleanEmail);
+    String realSenha = "p";
+    realSenha = await _databaseService.getSenhaRegsReal(cleanEmail);
+    if ( /*storedUser != null &&*/ realSenha.trim() == cleanPassword) {
+      idBox = cleanEmail;
+      final User u = User(email: "as", password: "as", boxId: idBox);
+      await _databaseService.updateUser(u);
+      await _loadUserData("as");
+      await _loadRealPackge(); //encomendas
+      //print("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n ACESS: \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n",);
     } else {
-      if (mounted) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Não achamos seu cadastro!')));
+      //print("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n NEGADO: \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
+      /*if (mounted) {
         // Mensagem de erro ao falhar o login
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Não achamos seu cadastro!')),
-        );
-      }
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Não achamos seu cadastro!')));
+      }*/
     }
+  }
+
+  Future<void> _loadRealPackge() async {
+    await _databaseService.clearPackages();
+    Map pacRealProds = await _databaseService.getProd(idBox);
+    //final pacProds = await _databaseService.getPackagesByUser("as");
+    //print("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n NEGADO: \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n",);
+
+    pacRealProds.forEach((key, value) async {
+      final PackageStatus p;
+      final String dateT = value['data_da_chegada'],
+          horaT = value['hora_da_chegada'];
+      if (value['entregue'] == false) {
+        p = PackageStatus.pending;
+      } else {
+        p = PackageStatus.arrived;
+      }
+      Package newPackage = new Package(
+        id: key.toString(),
+        userEmail: "as",
+        sender: value['sender'],
+        description: value['descricao'],
+        status: p,
+        estimatedDelivery: "$dateT - $horaT",
+        trackingCode: key.toString(),
+      );
+      await _handleAddPackage(newPackage);
+    });
   }
 
   // Lógica para ADICIONAR ENCOMENDA
@@ -180,6 +235,13 @@ class _AuthWrapperState extends State<AuthWrapper> {
     });
   }
 
+  // 💡 NOVO: Wrapper para recarregar dados
+  Future<void> _handleReloadData() async {
+    await _loadRealPackge();
+    // Chamamos _loadUserData com o email armazenado
+    await _loadUserData(_userEmail);
+  }
+
   @override
   Widget build(BuildContext context) {
     // Se AUTENTICADO E DADOS CARREGADOS
@@ -197,6 +259,10 @@ class _AuthWrapperState extends State<AuthWrapper> {
 
         // Passa a contagem de pendentes
         pendingPackagesCount: _pendingPackagesCount,
+
+        // 💡 NOVO: Passar o callback aqui
+        onReloadData: _handleReloadData,
+        idBox: idBox,
       );
     }
 

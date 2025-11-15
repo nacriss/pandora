@@ -1,11 +1,99 @@
 // lib/services/database_service.dart
 
+import 'dart:developer';
+import 'dart:ffi';
+/*
+{
+  "rules": {
+    ".read": true,
+    ".write": true
+  }
+}
+
+{
+  "rules": {
+    ".read": "now < 1762657200000",  // 2025-11-9
+    ".write": "now < 1762657200000",  // 2025-11-9
+  }
+}
+
+*/
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import '../models/user_model.dart';
 import '../models/package_model.dart';
 
+import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_database/firebase_database.dart';
+//import 'firebase_options.dart'; // gerado automaticamente pelo Firebase CLI
+
+//final dbRef = FirebaseDatabase.instance.ref();
+final _real = FirebaseDatabase.instance;
+
 class DatabaseService {
+  void lerDados() async {
+    try {
+      await _real.ref("quarto").set({"dono": "Mateus"});
+    } catch (e) {
+      log(e.toString());
+    }
+  }
+
+  Future<String> getSenhaRegsReal(String idCode) async {
+    String s = "";
+    try {
+      DataSnapshot dataSnap = (await _real
+          .ref("caixa:$idCode/user/senha")
+          .get());
+      s = dataSnap.value as String;
+    } catch (e) {
+      log(e.toString());
+    }
+    return s;
+  }
+
+  Future<int> getcoutProd(String idCode) async {
+    DataSnapshot snapshot;
+    int c = 0;
+    snapshot = (await _real.ref("caixa:$idCode/produtos").get());
+
+    final produtos = snapshot.value as Map<dynamic, dynamic>;
+    if (snapshot.exists) {
+      produtos.forEach((key, value) {
+        c++;
+      });
+    } else {
+      print('Nenhum produto encontrado.');
+    }
+
+    return c;
+  }
+
+  Future<Map> getProd(String idCode) async {
+    DataSnapshot snapshot;
+    snapshot = (await _real.ref("caixa:$idCode/produtos").get());
+
+    final produtos = snapshot.value as Map<dynamic, dynamic>;
+    if (snapshot.exists) {
+      produtos.forEach((key, value) {
+        print('Produto ID: $key');
+        print('Detalhes: $value\n');
+      });
+    } else {
+      print('Nenhum produto encontrado.');
+    }
+
+    return produtos;
+  }
+
+  /*
+  for (final child in snapshot.children) {
+      print(child.key);        // 'uid123', 'uid456', etc.
+      print(child.value);      // Dados do usuário
+    }
+    */
+
   static final DatabaseService _instance = DatabaseService._internal();
   factory DatabaseService() => _instance;
   DatabaseService._internal();
@@ -96,6 +184,47 @@ class DatabaseService {
   // ------------------------------------
   // --- Operações CRUD (Encomendas) ---
   // ------------------------------------
+
+  Future<void> insertRealPackage(Package package, String idCode) async {
+    String code = package.trackingCode;
+
+    try {
+      /*await _real.ref("caixa:$idCode/produtos/$code").set({
+        "sender": "A caminho",
+      });
+      await _real.ref("caixa:$idCode/produtos/$code").set({
+        "descricao": package.description,
+      });
+      await _real.ref("caixa:$idCode/produtos/$code").set({
+        "data_da_chegada": "A caminho",
+      });
+      await _real.ref("caixa:$idCode/produtos/$code").set({
+        "hora_da_chegada": "",
+      });
+      await _real.ref("caixa:$idCode/produtos/$code").set({
+        "numero_do_pedido": package.trackingCode,
+      });
+      await _real.ref("caixa:$idCode/produtos/$code").set({"entregue": false});
+      await _real.ref("caixa:$idCode/produtos/$code").set({"gravando": false});*/
+
+      await _real.ref("caixa:$idCode/produtos/$code").set({
+        "sender": package.sender,
+        "descricao": package.description,
+        "data_da_chegada": "A caminho",
+        "hora_da_chegada": "",
+        "numero_do_pedido": package.trackingCode,
+        "entregue": false,
+        "gravando": false,
+      });
+    } catch (e) {
+      log(e.toString());
+    }
+  }
+
+  Future<void> clearPackages() async {
+    final db = await database;
+    await db.delete(packageTableName);
+  }
 
   Future<void> insertPackage(Package package) async {
     final db = await database;
