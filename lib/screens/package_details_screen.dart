@@ -92,7 +92,7 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
       if (!_isMounted) return;
 
       setState(() {
-        currentPhoto = base64Image;
+        //currentPhoto = base64Image;
       });
 
       // Chama a função de atualização no AuthWrapper (main.dart)
@@ -106,7 +106,7 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
     }
   }
 
-  Widget _buildUploadPlaceholder() {
+  /*Widget _buildUploadPlaceholder() {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -120,7 +120,7 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
         ),
       ],
     );
-  }
+  }*/
 
   // Confirmação de DELETE
   Future<bool> confirmarSaida(BuildContext context) async {
@@ -153,8 +153,35 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
         false;
   }
 
+  Widget _placeholder() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.grey.shade300,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      alignment: Alignment.center,
+      child: const Icon(Icons.image, size: 60, color: Colors.grey),
+    );
+  }
+
+  List<String> separarPorPontoEVirgula(String? texto) {
+    if (texto == null) {
+      return [];
+    } else {
+      return texto.split(';').map((s) => s.trim()).toList();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    List<String> fotos = separarPorPontoEVirgula(widget.package.photo);
+    //fotos[0] = widget.package.photo!;
+    final bool temFotos;
+    if (widget.package.photo == "null") {
+      temFotos = false;
+    } else {
+      temFotos = true;
+    }
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -275,33 +302,24 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
                   'Foto da Encomenda / Entregador',
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                 ),
-                const SizedBox(height: 8),
-                GestureDetector(
-                  onTap: _handlePhotoUpload,
-                  child: Container(
-                    height: 200,
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade100,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                        color: Colors.grey.shade300,
-                        style: BorderStyle.solid,
-                        width: 2,
-                      ),
-                    ),
-                    child: currentPhoto != null
-                        ? ClipRRect(
-                            borderRadius: BorderRadius.circular(10),
-                            child: Image.memory(
-                              base64Decode(currentPhoto!),
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) =>
-                                  _buildUploadPlaceholder(),
-                            ),
-                          )
-                        : _buildUploadPlaceholder(),
-                  ),
+                SizedBox(
+                  height: 250,
+                  child: temFotos
+                      ? PageView.builder(
+                          itemCount: fotos.length,
+                          itemBuilder: (context, index) {
+                            return ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: Image.memory(
+                                base64Decode(fotos[index]!),
+                                fit: BoxFit.cover,
+                                //errorBuilder: (context, error, stackTrace) =>
+                                //  _buildUploadPlaceholder(),
+                              ),
+                            );
+                          },
+                        )
+                      : _placeholder(),
                 ),
                 const SizedBox(height: 30),
 

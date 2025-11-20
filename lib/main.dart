@@ -168,6 +168,15 @@ class _AuthWrapperState extends State<AuthWrapper> {
     }
   }
 
+  Package nPack = Package(
+    id: "id",
+    userEmail: "userEmail",
+    sender: 'sender',
+    description: 'description',
+    status: PackageStatus.arrived,
+    estimatedDelivery: 'estimatedDelivery',
+    trackingCode: 'trackingCode',
+  );
   Future<void> _loadRealPackge() async {
     await _databaseService.clearPackages();
     Map pacRealProds = await _databaseService.getProd(idBox);
@@ -183,6 +192,18 @@ class _AuthWrapperState extends State<AuthWrapper> {
       } else {
         p = PackageStatus.arrived;
       }
+      /*
+      String ss = "";
+
+      if (value['gravacao'][0 + 1] != null) {
+        ss = "${value['gravacao'][0 + 1]};";
+      }
+      for (int i = 2; i <= 2; i++) {
+        if (value['gravacao'][i] != null) {
+          ss = "${value['gravacao'][i]};";
+        }
+      }*/
+
       Package newPackage = new Package(
         id: key.toString(),
         userEmail: "as",
@@ -191,7 +212,10 @@ class _AuthWrapperState extends State<AuthWrapper> {
         status: p,
         estimatedDelivery: "$dateT - $horaT",
         trackingCode: key.toString(),
+        photo: value['gravacao'],
       );
+      nPack = newPackage;
+
       await _handleAddPackage(newPackage);
     });
   }
@@ -222,19 +246,20 @@ class _AuthWrapperState extends State<AuthWrapper> {
 
   // A função _handleUpdatePhoto original (mantida)
   void _handleUpdatePhoto(String packageId, String photo) {
-    setState(() {
+    /*setState(() {
       _packages = _packages.map((pkg) {
         if (pkg.id == packageId) {
           return pkg.copyWith(photo: photo);
         }
         return pkg;
       }).toList();
-    });
+    });*/
   }
 
   // 💡 NOVO: Wrapper para recarregar dados
   Future<void> _handleReloadData() async {
     await _loadRealPackge();
+    print("\n\n${nPack.sender}\n\n\n\n ${nPack.photo} \n\n\n\n...\n\n\n");
     // Chamamos _loadUserData com o email armazenado
     await _loadUserData(_userEmail);
   }
@@ -260,7 +285,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
   @override
   void initState() {
     super.initState();
-    _verificadorAutoLogin(); // 👈 executa quando a página carrega
+    _verificadorAutoLogin(); // executa quando a página carrega
   }
 
   @override

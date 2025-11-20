@@ -80,8 +80,8 @@ class DatabaseService {
     final produtos = snapshot.value as Map<dynamic, dynamic>;
     if (snapshot.exists) {
       produtos.forEach((key, value) {
-        print('Produto ID: $key');
-        print('Detalhes: $value\n');
+        //print('Produto ID: $key');
+        //print('Detalhes: $value\n');
       });
     } else {
       print('Nenhum produto encontrado.');
@@ -218,6 +218,7 @@ class DatabaseService {
         "numero_do_pedido": package.trackingCode,
         "entregue": false,
         "gravando": false,
+        "gravacao": "null",
       });
     } catch (e) {
       log(e.toString());
