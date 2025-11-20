@@ -179,8 +179,10 @@ class _PackageDetailsScreenState extends State<PackageDetailsScreen> {
     final bool temFotos;
     if (widget.package.photo == "null") {
       temFotos = false;
+      //print(widget.package.photo);
     } else {
       temFotos = true;
+      //print(fotos[1]);
     }
     return Scaffold(
       appBar: AppBar(

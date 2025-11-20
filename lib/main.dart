@@ -192,6 +192,25 @@ class _AuthWrapperState extends State<AuthWrapper> {
       } else {
         p = PackageStatus.arrived;
       }
+
+      String ss = "";
+
+      if (value['gravacao'] == "ss") {
+        if (value['frame'][1] != null) {
+          ss = "${value['frame'][0]}";
+        }
+        for (int i = 1; i < 10; i++) {
+          if (value['frame'][i] != null) {
+            ss = "$ss;${value['frame'][i]}";
+          }
+        }
+        //print("\n\n\n\n\n\ns\n\n\n\n\n\n");
+        //print(value['frame'][1]);
+      } else {
+        ss = "null";
+        //print("\n\n\n\n\n\ns\n\n\n\n\n\n");
+        //print(ss);
+      }
       /*
       String ss = "";
 
@@ -212,7 +231,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
         status: p,
         estimatedDelivery: "$dateT - $horaT",
         trackingCode: key.toString(),
-        photo: value['gravacao'],
+        photo: ss, //value['gravacao'],
       );
       nPack = newPackage;
 
