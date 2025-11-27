@@ -95,10 +95,22 @@ class _SmartBoxControlScreenState extends State<SmartBoxControlScreen> {
       _isLocked = !_isLocked;
       if (_isLocked) {
         await _real.ref("caixa:$idBox").update({"estado": "fechado"});
+        await _real.ref("caixa:$idBox/user").update({"porta": false});
+      } else {
+        await _real.ref("caixa:$idBox").update({"estado": "aberto"});
+        await _real.ref("caixa:$idBox/user").update({"porta": true});
+      }
+    });
+    /*
+  void _handleLockToggle() {
+    setState(() async {
+      _isLocked = !_isLocked;
+      if (_isLocked) {
+        await _real.ref("caixa:$idBox").update({"estado": "fechado"});
       } else {
         await _real.ref("caixa:$idBox").update({"estado": "aberto"});
       }
-    });
+    });*/
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
