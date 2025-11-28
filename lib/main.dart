@@ -3,6 +3,8 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:pandora/services/fcm_service.dart';
+import 'package:pandora/services/notification_service.dart';
 import 'screens/login_screen.dart';
 import 'screens/register_screen.dart';
 import 'screens/home_screen.dart';
@@ -12,13 +14,37 @@ import 'services/database_service.dart';
 
 import 'package:flutter/material.dart';
 import 'firebase_options.dart'; // gerado automaticamente
+import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 void main() async {
-  // Garante que o binding está pronto para chamadas de plugin (como sqflite)
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  await NotificationService.init();
+
+  await FCMService().init();
+
+  FirebaseMessaging.onBackgroundMessage(_firebaseBackgroundHandler);
 
   runApp(const PandoraApp());
+}
+
+@pragma('vm:entry-point')
+Future<void> _firebaseBackgroundHandler(RemoteMessage message) async {
+  print("Notificação em background recebida: ${message.notification?.title}");
+
+  await NotificationService.showLocal(
+    title: message.notification?.title ?? "Nova notificação",
+    body: message.notification?.body ?? "Você tem uma nova mensagem",
+  );
 }
 
 String idBox = "";

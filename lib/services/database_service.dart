@@ -293,4 +293,14 @@ class DatabaseService {
       whereArgs: [packageId],
     );
   }
+
+  Future<void> saveTokenFCM(String token, String idCode) async {
+    try {
+      await _real.ref("caixa:$idCode/user").update({
+        "fcmToken": token
+      });
+    } catch(e) {
+      log(e.toString());
+    }
+  }
 }
